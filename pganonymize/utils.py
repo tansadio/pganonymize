@@ -8,6 +8,7 @@ import math
 import re
 import subprocess
 import time
+import uuid
 
 import parmap
 import psycopg2
@@ -89,7 +90,7 @@ def build_and_then_import_data(connection, table, primary_key, columns,
         logging.info(sql_select.as_string(connection))
     cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor, name='fetch_large_result')
     cursor.execute(sql_select.as_string(connection))
-    temp_table = 'tmp_{table}'.format(table=table)
+    temp_table = 'tmp_{table}_{uid}'.format(table=table, uid=uuid.uuid4().hex)
     create_temporary_table(connection, columns, table, temp_table, primary_key)
     batches = int(math.ceil((1.0 * total_count) / (1.0 * chunk_size)))
     for i in trange(batches, desc="Processing {} batches for {}".format(batches, table), disable=not verbose):
